@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-wrapper with-sidebar">
+    <div class="page-content">
+
+        <!-- Header -->
+        <div class="page-header fade-in">
+            <h2>My Profile</h2>
+            <a href="{{ url_for('profile.edit_profile') }}" class="btn btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                Edit Profile
+            </a>
+        </div>
+
+        <!-- Profile Card -->
+        <div class="glass-card profile-card fade-in fade-in-delay-1">
+            <div class="profile-card-top">
+                <div class="profile-avatar-wrap">
+                    <img src="{{ url_for('static', filename='uploads/profile/' + current_user.profile_image) }}"
+                         alt="{{ current_user.username }}"
+                         class="profile-avatar"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="profile-avatar-fallback" style="display:none;">
+                        {{ current_user.username[0]|upper }}
+                    </div>
+                </div>
+                <div class="profile-info">
+                    <h3 class="profile-name">{{ current_user.username }}</h3>
+                    <p class="profile-email">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                        {{ current_user.email }}
+                    </p>
+                    <p class="profile-bio">{{ current_user.bio or "No bio added yet." }}</p>
+                    <p class="profile-joined">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        Member since {{ current_user.created_at.strftime("%B %Y") }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="profile-actions-grid fade-in fade-in-delay-2">
+            <a href="{{ url_for('profile.edit_profile') }}" class="glass-card profile-action-card">
+                <div class="profile-action-icon icon-indigo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                </div>
+                <h4>Edit Profile</h4>
+                <p>Update your name, bio and avatar</p>
+            </a>
+
+            <a href="{{ url_for('profile.change_password') }}" class="glass-card profile-action-card">
+                <div class="profile-action-icon icon-amber">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                </div>
+                <h4>Change Password</h4>
+                <p>Update your security credentials</p>
+            </a>
+
+            <a href="{{ url_for('profile.test_email') }}" class="glass-card profile-action-card">
+                <div class="profile-action-icon icon-cyan">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                </div>
+                <h4>Test Email</h4>
+                <p>Send a test email notification</p>
+            </a>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

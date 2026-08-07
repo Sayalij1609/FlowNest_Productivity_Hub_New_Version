@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-wrapper with-sidebar">
+    <div class="page-content">
+
+        <!-- Header -->
+        <div class="page-header fade-in">
+            <h2>My Notes</h2>
+            <a href="{{ url_for('notes.create_note') }}" class="btn btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                New Note
+            </a>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="notes-search-bar fade-in fade-in-delay-1">
+            <form method="GET" action="{{ url_for('notes.list_notes') }}" class="notes-search-form">
+                <div class="search-input-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" name="search" value="{{ search }}" placeholder="Search notes..."
+                        class="form-control" id="notes-search-input">
+                </div>
+                <button type="submit" class="btn btn-primary btn-icon-only">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
+            </form>
+        </div>
+
+        {% if notes %}
+
+        <!-- Notes Grid -->
+        <div class="notes-grid">
+            {% for note in notes %}
+            <div class="glass-card note-card note-color-{{ note.color }} fade-in fade-in-delay-{{ loop.index % 4 }}" id="note-card-{{ note.id }}">
+
+                <!-- Pin Badge -->
+                {% if note.is_pinned %}
+                <div class="note-pin-badge">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                        <path d="M16 2L21 7L18.5 9.5L19 14L14 19L13 18L9.5 14.5L4 20L3 19L8.5 13.5L5 10L10 9L12.5 6.5L16 2Z"/>
+                    </svg>
+                    Pinned
+                </div>
+                {% endif %}
+
+                <!-- Note Content -->
+                <div class="note-card-body">
+                    <h3 class="note-title">{{ note.title }}</h3>
+                    <p class="note-content-preview">{{ note.content[:180] }}{% if note.content|length > 180 %}...{% endif %}</p>
+                </div>
+
+                <!-- Note Footer -->
+                <div class="note-card-footer">
+                    <span class="note-timestamp">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        {{ note.updated_at.strftime("%b %d, %Y") }}
+                    </span>
+                    <div class="note-actions">
+                        <a href="{{ url_for('notes.pin_note', note_id=note.id) }}" class="note-action-btn" title="{{ 'Unpin' if note.is_pinned else 'Pin' }}">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="{{ 'currentColor' if note.is_pinned else 'none' }}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 2L21 7L18.5 9.5L19 14L14 19L13 18L9.5 14.5L4 20L3 19L8.5 13.5L5 10L10 9L12.5 6.5L16 2Z"/>
+                            </svg>
+                        </a>
+                        <a href="{{ url_for('notes.update_note', note_id=note.id) }}" class="note-action-btn" title="Edit">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                        </a>
+                        <a href="{{ url_for('notes.delete_note', note_id=note.id) }}" class="note-action-btn note-action-danger" title="Delete" onclick="return confirm('Delete this note?')">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+
+        <!-- Empty State -->
+        <div class="empty-state fade-in fade-in-delay-1">
+            <div class="empty-state-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                </svg>
+            </div>
+            <h3>No notes yet</h3>
+            <p>Create your first note to start capturing ideas</p>
+            <a href="{{ url_for('notes.create_note') }}" class="btn btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Create Note
+            </a>
+        </div>
+
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}

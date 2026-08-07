@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-wrapper with-sidebar">
+    <div class="page-content">
+
+        <!-- Page Header -->
+        <div class="page-header fade-in">
+            <h2>My Categories</h2>
+            <a href="{{ url_for('categories.create_category') }}" class="btn btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                New Category
+            </a>
+        </div>
+
+        <!-- Category List -->
+        {% if categories %}
+
+        <div class="categories-grid fade-in fade-in-delay-1">
+            {% for category in categories %}
+            <div class="category-card">
+                <div class="category-card-info">
+                    <span class="category-color-swatch" style="background: {{ category.color }};"></span>
+                    <div>
+                        <div class="category-card-name">{{ category.name }}</div>
+                        <div class="category-card-count">{{ category.tasks|length }} task{{ 's' if category.tasks|length != 1 else '' }}</div>
+                    </div>
+                </div>
+                <div class="category-card-actions">
+                    <a href="{{ url_for('categories.update_category', category_id=category.id) }}" class="btn-xs btn-warning-soft">Edit</a>
+                    <a href="{{ url_for('categories.delete_category', category_id=category.id) }}" class="btn-xs btn-danger-soft"
+                        onclick="return confirm('Delete this category? Tasks in this category will become uncategorized.');">Delete</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+
+        <!-- Empty State -->
+        <div class="empty-state fade-in">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </svg>
+            <h3>No categories yet</h3>
+            <p>Create categories to organize your tasks into groups.</p>
+            <a href="{{ url_for('categories.create_category') }}" class="btn btn-primary">Create Category</a>
+        </div>
+
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}

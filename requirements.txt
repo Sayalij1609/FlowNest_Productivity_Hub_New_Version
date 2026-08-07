@@ -1,0 +1,13 @@
+flask 
+flask-sqlalchemy 
+flask-login 
+flask-wtf 
+flask-migrate 
+python-dotenv 
+pillow 
+werkzeug
+email-validator
+Flask-Mail
+gunicorn
+psycopg2-binary
+APScheduler

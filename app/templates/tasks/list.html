@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-wrapper with-sidebar">
+    <div class="page-content">
+
+        <!-- Page Header -->
+        <div class="page-header fade-in">
+            <h2>My Tasks</h2>
+            <a href="{{ url_for('tasks.create_task') }}" class="btn btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                New Task
+            </a>
+        </div>
+
+        <!-- Filter Pills -->
+        <div class="filter-pills fade-in fade-in-delay-1">
+            <a href="{{ url_for('tasks.list_tasks') }}" class="filter-pill {{ 'active' if not selected_filter else '' }}">All</a>
+            <a href="{{ url_for('tasks.list_tasks', filter='today') }}" class="filter-pill {{ 'active' if selected_filter == 'today' else '' }}">Today</a>
+            <a href="{{ url_for('tasks.list_tasks', filter='upcoming') }}" class="filter-pill {{ 'active' if selected_filter == 'upcoming' else '' }}">Upcoming</a>
+            <a href="{{ url_for('tasks.list_tasks', filter='overdue') }}" class="filter-pill {{ 'active' if selected_filter == 'overdue' else '' }}">Overdue</a>
+            <a href="{{ url_for('tasks.list_tasks', filter='high') }}" class="filter-pill {{ 'active' if selected_filter == 'high' else '' }}">High Priority</a>
+            <a href="{{ url_for('tasks.list_tasks', filter='pending') }}" class="filter-pill {{ 'active' if selected_filter == 'pending' else '' }}">Pending</a>
+            <a href="{{ url_for('tasks.list_tasks', filter='completed') }}" class="filter-pill {{ 'active' if selected_filter == 'completed' else '' }}">Completed</a>
+        </div>
+
+        <!-- Search / Filter Bar -->
+        <form method="GET" class="search-bar fade-in fade-in-delay-2">
+            {{ form.search(class="form-control", placeholder="Search tasks...") }}
+            {{ form.category(class="form-select") }}
+            {{ form.priority(class="form-select") }}
+            {{ form.status(class="form-select") }}
+            <button type="submit" class="btn btn-primary" style="padding: 0.7rem 1.5rem;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </button>
+        </form>
+
+        <!-- Task Cards -->
+        {% if tasks %}
+
+        {% for task in tasks %}
+        <div class="task-card priority-{{ task.priority|lower }} fade-in">
+
+            <div class="task-card-header">
+                <h3 class="task-card-title">
+                    <a href="{{ url_for('tasks.view_task', task_id=task.id) }}">{{ task.title }}</a>
+                </h3>
+                <div style="display: flex; gap: 6px; flex-shrink: 0;">
+                    <span class="badge badge-{{ task.status|lower }}">{{ task.status }}</span>
+                    <span class="badge badge-{{ task.priority|lower }}">{{ task.priority }}</span>
+                </div>
+            </div>
+
+            <div class="task-card-meta">
+                {% if task.category %}
+                <span class="category-tag">
+                    <span class="category-dot" style="background: {{ task.category.color }};"></span>
+                    {{ task.category.name }}
+                </span>
+                <span>·</span>
+                {% endif %}
+                <span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    {{ task.deadline.strftime("%d %b %Y") if task.deadline else "No Deadline" }}
+                </span>
+                <span>·</span>
+                <span>Created {{ task.created_at.strftime("%d %b %Y") }}</span>
+            </div>
+
+            {% if task.description %}
+            <p style="margin: 0 0 var(--space-md); font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
+                {{ task.description[:120] }}{% if task.description|length > 120 %}...{% endif %}
+            </p>
+            {% endif %}
+
+            <div class="task-card-actions">
+                <a href="{{ url_for('tasks.view_task', task_id=task.id) }}" class="btn-xs btn-info-soft">View</a>
+                <a href="{{ url_for('tasks.update_task', task_id=task.id) }}" class="btn-xs btn-warning-soft">Edit</a>
+
+                {% if task.status == "Pending" %}
+                <a href="{{ url_for('tasks.complete_task', task_id=task.id) }}" class="btn-xs btn-success-soft">Complete</a>
+                {% endif %}
+
+                {% if task.status == "Completed" %}
+                <a href="{{ url_for('tasks.archive_task', task_id=task.id) }}" class="btn-xs btn-muted-soft">Archive</a>
+                {% endif %}
+
+                <a href="{{ url_for('tasks.delete_task', task_id=task.id) }}" class="btn-xs btn-danger-soft"
+                    onclick="return confirm('Are you sure you want to delete this task?');">Delete</a>
+            </div>
+
+        </div>
+        {% endfor %}
+
+        {% else %}
+
+        <!-- Empty State -->
+        <div class="empty-state fade-in">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 11l3 3L22 4"></path>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+            </svg>
+            <h3>No tasks found</h3>
+            <p>Get started by creating your first task or adjust your filters.</p>
+            <a href="{{ url_for('tasks.create_task') }}" class="btn btn-primary">Create Task</a>
+        </div>
+
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}
