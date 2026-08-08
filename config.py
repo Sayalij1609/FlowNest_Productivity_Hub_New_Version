@@ -7,6 +7,10 @@ load_dotenv()
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
+# Ensure instance directory exists
+INSTANCE_DIR = os.path.join(BASE_DIR, "instance")
+os.makedirs(INSTANCE_DIR, exist_ok=True)
+
 class Config:
     """
     Application configuration class.
@@ -14,13 +18,12 @@ class Config:
     """
 
     # Secret key used by Flask
-    SECRET_KEY = os.getenv("SECRET_KEY")
+    SECRET_KEY = os.getenv("SECRET_KEY") or "flownest-dev-secret-key-12345"
 
-    # Database URI
+    # Database URI — use absolute path for SQLite
     SQLALCHEMY_DATABASE_URI = os.getenv(
-    "DATABASE_URL",
-    "sqlite:///" + os.path.join(BASE_DIR, "instance", "database.db")
-    )
+        "DATABASE_URL"
+    ) or ("sqlite:///" + os.path.join(BASE_DIR, "instance", "flownest.db"))
 
     # Disable unnecessary tracking
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -35,7 +38,7 @@ class Config:
     # Maximum upload size (16 MB)
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024
 
-    REMINDER_TOKEN = os.getenv("REMINDER_TOKEN")
+    REMINDER_TOKEN = os.getenv("REMINDER_TOKEN") or "flownest-reminder-token"
 
     MAIL_SERVER = "smtp.gmail.com"
     MAIL_PORT = 587
@@ -45,3 +48,10 @@ class Config:
     MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
 
     MAIL_DEFAULT_SENDER = MAIL_USERNAME
+
+    # JWT Configuration
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY") or SECRET_KEY or "flownest-jwt-dev-secret-12345"
+    JWT_ACCESS_TOKEN_EXPIRES = 86400  # 24 hours in seconds
+    JWT_TOKEN_LOCATION = ["headers"]
+    JWT_HEADER_NAME = "Authorization"
+    JWT_HEADER_TYPE = "Bearer"
