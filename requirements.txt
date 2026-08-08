@@ -11,3 +11,5 @@ Flask-Mail
 gunicorn
 psycopg2-binary
 APScheduler
+flask-cors
+flask-jwt-extended
