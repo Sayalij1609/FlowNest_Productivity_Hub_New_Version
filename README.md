@@ -1,15 +1,17 @@
 <div align="center">
 
-# 🪺 FlowNest — Your Productivity Hub
+# 🪺 FlowNest — Productivity Hub
 
-**A beautiful, full-stack productivity web application built with Flask.**
+**A modern, full-stack productivity web application built with React (Vite) and Flask REST API.**
 
-Manage tasks, capture notes, build habits, track your calendar, and stay productive — all in one elegant workspace.
+Manage tasks, capture notes, build habits, track your calendar, and gain analytical insights — all in a sleek, glassmorphic workspace.
 
+[![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org)
+[![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
 [![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![Flask](https://img.shields.io/badge/Flask-3.0-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com)
-[![SQLite](https://img.shields.io/badge/SQLite-Database-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://sqlite.org)
-[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+[![JWT](https://img.shields.io/badge/Auth-JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)](https://jwt.io)
+[![SQLite](https://img.shields.io/badge/Database-SQLite%20%2F%20PostgreSQL-003B57?style=for-the-badge&logo=postgresql&logoColor=white)](https://sqlite.org)
 
 </div>
 
@@ -18,295 +20,225 @@ Manage tasks, capture notes, build habits, track your calendar, and stay product
 ## ✨ Features
 
 ### 📋 Task Management
-- Create, edit, delete, and archive tasks
-- Set **priority levels** (Low, Medium, High, Urgent)
-- Assign **categories** with color coding
-- Add **deadlines** and **reminders**
-- Attach **files** to tasks (images, PDFs, docs)
-- Filter tasks by status, priority, category, and search
+- Create, edit, delete, and restore **archived tasks**
+- Set **priority levels** (Low, Medium, High)
+- Assign custom **color-coded categories**
+- Set **deadlines** and automated **reminders**
+- Support for **file attachments** (images, PDFs, documents)
+- Filter by status (Pending / Completed), priority, category, and real-time search
 
 ### 📝 Smart Notes
-- Create color-coded notes with rich content
-- **Pin** important notes to the top
-- Full-text **search** across all notes
-- Masonry grid layout for visual organization
+- Masonry-style grid layout with custom color themes (Yellow, Blue, Green, Pink, Orange, Purple, Gray)
+- **Pin** important notes to the top of your board
+- Instant full-text search across titles and content
 
 ### 🔥 Habit Tracker
-- Create daily habits with customizable frequency
-- **Streak tracking** — current & longest streaks
-- Daily check-in system with completion logging
-- **Completion rate** analytics per habit
-- Visual progress statistics
+- Track daily habits with automated **streak calculation** (Current & Best Streaks)
+- Interactive daily check-in / undo completion system
+- **Weekly progress indicators** & GitHub-style **habit completion heatmap**
+- Per-habit completion rate metrics
 
 ### 📅 Calendar View
-- Monthly calendar with **task & habit indicators**
-- Click any day to see detailed task/habit breakdown
-- Visual dots showing busy days at a glance
+- Interactive monthly grid with day-level **task & habit activity indicators**
+- Detailed **day view breakdown** (`/calendar/day/YYYY/MM/DD`) showing scheduled tasks and completed habits for any selected date
 
-### 📊 Statistics & Insights
-- **Task status pie chart** (Completed / Pending / Archived)
-- **Weekly & Monthly productivity** trend charts
-- **Category distribution** doughnut chart
-- **Habit completion rate** horizontal bar chart
-- Powered by Chart.js with theme-aware styling
+### 📊 Statistics & Analytics
+- **Task completion metrics** and quick stat summaries
+- **Weekly Productivity Bar Chart** & **Monthly Trend Line Chart**
+- **Category Distribution Doughnut Chart**
+- **Habit Completion Rates Horizontal Bar Chart**
+- Powered by `Chart.js` with responsive glassmorphic styling
 
 ### 🔔 Notifications & Email Reminders
-- In-app notification system with read/unread states
-- **Automatic email reminders** via Gmail SMTP
-- Background scheduler checks every 60 seconds
-- Unread badge counter in navbar
+- In-app notification feed with unread indicators and mark-as-read controls
+- Background **APScheduler** job running every 60 seconds for due email reminders
+- SMTP integration via Flask-Mail
 
-### 👤 User Profile
-- Profile picture upload with image resizing
-- Editable bio and personal details
-- Secure password change
-- Test email functionality
-- Member-since date display
-
-### 🎨 Design & UX
-- **Glassmorphism** design system
-- **Dark / Light** theme toggle with persistence
-- Fully **responsive** — works on desktop, tablet, and mobile
-- Premium typography with **Google Fonts (Inter)**
-- Smooth CSS animations and micro-interactions
-- Enterprise-grade glassmorphic sidebar navigation
+### 🎨 Theme & UI Excellence
+- **Glassmorphism Design Tokens** with smooth CSS animations and micro-interactions
+- **Dark / Light mode** toggle with persistent user preference (`localStorage`)
+- Fully responsive across desktop, tablet, and mobile displays
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ Architecture & Tech Stack
+
+FlowNest uses a decoupled **SPA + REST API** architecture:
+
+```
+                      +-----------------------------+
+                      |     React (Vite) SPA        |
+                      |  Axios + JWT Auth + Context |
+                      +--------------+--------------+
+                                     |
+                                REST API (/api)
+                                     |
+                      +--------------v--------------+
+                      |      Flask Backend API      |
+                      | SQLAlchemy + APScheduler    |
+                      +--------------+--------------+
+                                     |
+                      +--------------v--------------+
+                      |   SQLite / PostgreSQL DB    |
+                      +-----------------------------+
+```
 
 | Layer | Technology |
 |-------|-----------|
-| **Backend** | Python 3.12, Flask 3.0 |
-| **Database** | SQLite + SQLAlchemy ORM |
-| **Auth** | Flask-Login (session-based) |
-| **Forms** | Flask-WTF + WTForms |
-| **Email** | Flask-Mail (Gmail SMTP) |
-| **Scheduler** | APScheduler (background jobs) |
-| **Migrations** | Flask-Migrate (Alembic) |
-| **Frontend** | HTML5, CSS3, Vanilla JavaScript |
-| **Charts** | Chart.js 4.x |
-| **Images** | Pillow (resize/optimize) |
-| **Deployment** | Gunicorn + Render/Heroku ready |
+| **Frontend Framework** | React 18, Vite 8, React Router DOM 7 |
+| **Frontend Styling** | Custom Vanilla CSS (Design Tokens, Glassmorphism) |
+| **Charts & Alerts** | Chart.js (`react-chartjs-2`), React Hot Toast |
+| **HTTP Client** | Axios (with Request Interceptor for JWT Bearer Tokens) |
+| **Backend Framework** | Python 3.12, Flask 3.0 |
+| **API Authentication** | Flask-JWT-Extended (Stateless JWT Tokens) |
+| **Database & ORM** | SQLAlchemy, Flask-Migrate (Alembic) |
+| **Supported Databases** | SQLite (Development), PostgreSQL (`psycopg2-binary` for Production) |
+| **Background Jobs** | APScheduler + Flask-Mail |
 
 ---
 
 ## 📁 Project Structure
 
 ```
-FlowNest_Your Productivity Hub/
-├── app/
-│   ├── __init__.py              # App factory (create_app)
-│   ├── extensions.py            # Flask extensions (db, login, mail)
-│   ├── models.py                # SQLAlchemy models (User, Task, Note, etc.)
-│   ├── forms.py                 # WTForms form classes
-│   ├── utils.py                 # Helpers (streaks, stats, image upload)
+FlowNest/
+├── app/                        # Python Flask Backend
+│   ├── __init__.py             # Flask App Factory & React Static Serving
+│   ├── extensions.py           # DB, JWT, CORS, Mail, Migrate instances
+│   ├── models.py               # SQLAlchemy Models (User, Task, Habit, Note, etc.)
+│   ├── utils.py                # Business logic helpers (streaks, statistics)
 │   ├── routes/
-│   │   ├── main.py              # Landing page
-│   │   ├── auth.py              # Login, Register, Logout
-│   │   ├── dashboard.py         # Dashboard with overview stats
-│   │   ├── tasks.py             # CRUD for tasks + file attachments
-│   │   ├── categories.py        # Task category management
-│   │   ├── habits.py            # Habit CRUD + daily check-in
-│   │   ├── notes.py             # Notes CRUD + pin/search
-│   │   ├── calendar.py          # Monthly calendar + day details
-│   │   ├── stats.py             # Statistics & chart data
-│   │   ├── profile.py           # Profile, password, test email
-│   │   └── notifications.py     # Notification list + mark read
-│   ├── services/
-│   │   ├── email_service.py     # Send reminder emails via SMTP
-│   │   ├── notification_service.py  # Create in-app notifications
-│   │   ├── reminder_service.py  # Check & send due reminders
-│   │   └── scheduler.py         # APScheduler background jobs
-│   ├── static/
-│   │   ├── style/style.css      # Full design system (~4000 lines)
-│   │   ├── js/script.js         # Theme toggle, alerts, nav
-│   │   ├── js/statistics.js     # Chart.js chart initialization
-│   │   └── uploads/             # User-uploaded files & profile pics
-│   └── templates/
-│       ├── base.html             # Base layout (navbar, sidebar, scripts)
-│       ├── home.html             # Landing page
-│       ├── navbar.html           # Top navigation bar
-│       ├── sidebar.html          # Side navigation
-│       ├── auth/                 # Login & Register pages
-│       ├── dashboard/            # Dashboard overview
-│       ├── tasks/                # Task list, create, edit, view
-│       ├── categories/           # Category management
-│       ├── habits/               # Habit list, detail, check-in
-│       ├── notes/                # Notes grid & create/edit
-│       ├── calender/             # Calendar & day details
-│       ├── statistics/           # Charts & analytics
-│       ├── profile/              # Profile, edit, change password
-│       └── notifications/        # Notification list
-├── migrations/                   # Alembic migration files
-├── config.py                     # App configuration
-├── run.py                        # Entry point
-├── requirements.txt              # Python dependencies
-├── Procfile                      # Deployment process file
-├── runtime.txt                   # Python version for deployment
-└── .env                          # Environment variables (not in git)
+│   │   ├── api/                # REST API Endpoints (/api/*)
+│   │   │   ├── auth.py         # Login, Register, GET /auth/me
+│   │   │   ├── dashboard.py    # Overview statistics API
+│   │   │   ├── tasks.py        # Task CRUD & file upload API
+│   │   │   ├── categories.py   # Category CRUD API
+│   │   │   ├── habits.py       # Habit CRUD & check-in API
+│   │   │   ├── notes.py        # Notes CRUD & pinning API
+│   │   │   ├── calendar_api.py # Calendar month & day APIs
+│   │   │   ├── stats.py        # Productivity analytics API
+│   │   │   ├── profile.py      # Profile & password API
+│   │   │   └── notifications.py# Notifications API
+│   │   └── reminders.py        # External cron reminder endpoint
+│   ├── services/               # Notification & email scheduler services
+│   └── static/uploads/         # File attachment uploads directory
+├── frontend/                   # React Single Page Application
+│   ├── src/
+│   │   ├── api/client.js       # Axios client with JWT interceptor
+│   │   ├── context/            # AuthContext & ThemeContext
+│   │   ├── components/         # Navbar, Sidebar, AppLayout, ProtectedRoute
+│   │   ├── pages/              # React Views (Dashboard, Tasks, Habits, Notes, etc.)
+│   │   ├── index.css           # Glassmorphism Design System CSS
+│   │   ├── App.jsx             # React Router routing setup
+│   │   └── main.jsx            # Application entry point
+│   ├── package.json
+│   └── vite.config.js          # Vite build config & dev proxy (/api -> :5000)
+├── instance/                   # SQLite database directory (Development)
+├── config.py                   # Environment & Flask app settings
+├── run.py                      # Flask backend entry point
+├── requirements.txt            # Python dependencies
+└── .env                        # Local environment variables
 ```
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Local Development Setup
 
-### Prerequisites
+### 1. Prerequisites
+- **Python 3.10+**
+- **Node.js 18+** & **npm**
 
-- **Python 3.10+** installed
-- **Git** installed
-- A **Gmail account** with [App Password](https://myaccount.google.com/apppasswords) (for email reminders)
-
-### 1. Clone the Repository
+### 2. Backend Setup (Flask API)
 
 ```bash
+# Clone the repository
 git clone https://github.com/your-username/FlowNest.git
 cd FlowNest
-```
 
-### 2. Create Virtual Environment
-
-```bash
-# Windows
+# Create and activate virtual environment
 python -m venv venv
+
+# Windows (PowerShell):
 venv\Scripts\activate
 
-# macOS / Linux
-python3 -m venv venv
+# macOS / Linux:
 source venv/bin/activate
-```
 
-### 3. Install Dependencies
-
-```bash
+# Install Python packages
 pip install -r requirements.txt
-```
 
-### 4. Configure Environment Variables
+# Create .env file in root directory
+SECRET_KEY=dev-secret-key-change-in-prod
+JWT_SECRET_KEY=dev-jwt-secret-key-change-in-prod
+REMINDER_TOKEN=dev-reminder-token
 
-Create a `.env` file in the project root:
-
-```env
-SECRET_KEY=your-super-secret-key-here
-DATABASE_URL=sqlite:///database.db
-MAIL_USERNAME=your-email@gmail.com
-MAIL_PASSWORD=your-16-char-app-password
-```
-
-> **📧 Gmail Setup:** You need a [Google App Password](https://myaccount.google.com/apppasswords) (requires 2-Step Verification enabled). Regular Gmail passwords won't work.
-
-### 5. Initialize the Database
-
-```bash
-flask db init
-flask db migrate -m "Initial migration"
+# Run database migrations
 flask db upgrade
-```
 
-### 6. Run the Application
-
-```bash
+# Start Flask backend server (port 5000)
 python run.py
 ```
 
-Open your browser and go to **http://127.0.0.1:5000** 🎉
+### 3. Frontend Setup (React SPA)
 
----
-
-## 📧 Email Reminder Setup
-
-FlowNest sends **automatic email reminders** for tasks with upcoming deadlines.
-
-### How it works:
-1. The **APScheduler** runs a background job every 60 seconds
-2. It checks for tasks where `reminder <= now` and `reminder_sent == False`
-3. Sends an email via Gmail SMTP to the task owner
-4. Marks the reminder as sent
-
-### Gmail Configuration:
-1. Enable **2-Step Verification** on your Google account
-2. Generate an **App Password** at [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
-3. Add it to your `.env` file (no spaces):
-   ```
-   MAIL_USERNAME=your-email@gmail.com
-   MAIL_PASSWORD=abcdefghijklmnop
-   ```
-
----
-
-## 🗃️ Database Models
-
-| Model | Description |
-|-------|-----------|
-| `User` | Authentication, profile, theme preference |
-| `Task` | Tasks with priority, category, deadline, reminder, file attachment |
-| `Category` | User-defined task categories with colors |
-| `Habit` | Daily habits with frequency and streak tracking |
-| `HabitLog` | Daily completion log for each habit |
-| `Note` | Color-coded notes with pin and timestamps |
-| `Notification` | In-app notifications with read/unread status |
-
----
-
-## 🌐 Deployment
-
-FlowNest is deployment-ready with **Gunicorn** and a **Procfile**.
-
-### Deploy to Render
-
-1. Push your code to GitHub
-2. Create a new **Web Service** on [Render](https://render.com)
-3. Connect your GitHub repository
-4. Set environment variables:
-   - `SECRET_KEY`
-   - `DATABASE_URL` (use PostgreSQL for production)
-   - `MAIL_USERNAME`
-   - `MAIL_PASSWORD`
-5. Render will auto-detect the `Procfile` and deploy
-
-### Deploy to Heroku
+In a **second terminal**:
 
 ```bash
-heroku create flownest-app
-heroku config:set SECRET_KEY=your-secret-key
-heroku config:set MAIL_USERNAME=your-email@gmail.com
-heroku config:set MAIL_PASSWORD=your-app-password
-git push heroku main
-heroku run flask db upgrade
+cd frontend
+
+# Install npm packages
+npm install
+
+# Start Vite dev server (port 5173)
+npm run dev
+```
+
+Open **`http://localhost:5173/app/`** in your browser 🎉
+
+---
+
+## ☁️ Production Deployment Guide
+
+FlowNest is designed to be served as a single unified service on free hosting platforms (e.g. **Render**, **Railway**, **Fly.io**, **Koyeb**).
+
+### Single-Service Deployment Strategy
+Flask automatically serves the built React static bundle from `frontend/dist` for all non-API routes (`/app/*` and `/`).
+
+### 1. Build Frontend Bundle
+```bash
+cd frontend
+npm run build
+```
+This generates the optimized production build in `frontend/dist/`.
+
+### 2. Environment Variables for Hosting Platform
+Set these environment variables in your hosting provider's dashboard:
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `SECRET_KEY` | Flask session secret key | `random-secure-string` |
+| `JWT_SECRET_KEY` | JWT signing secret | `random-jwt-secure-string` |
+| `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:pass@host/dbname` |
+| `REMINDER_TOKEN` | Security token for cron triggers | `your-cron-secret-token` |
+| `MAIL_USERNAME` | *(Optional)* Gmail SMTP address | `your-app@gmail.com` |
+| `MAIL_PASSWORD` | *(Optional)* Google App Password | `16-character-app-password` |
+
+### 3. Start Command for Server
+```bash
+gunicorn run:app
 ```
 
 ---
 
-## 🎨 Theme System
+## 🗄️ Database Migration (SQLite ➔ PostgreSQL)
 
-FlowNest supports **Dark** and **Light** themes with instant switching:
+FlowNest comes ready with `psycopg2-binary` in `requirements.txt`.
 
-- Toggle via the 🌙/☀️ button in the navbar
-- Theme preference is saved to `localStorage`
-- Flash-of-unstyled-content (FOUC) prevention with inline script
-- All components use CSS custom properties for seamless theming
-
----
-
-## 📸 Screenshots
-
-| Dark Mode | Light Mode |
-|-----------|------------|
-| Landing page with glassmorphic hero | Clean light variant |
-| Dashboard with stats cards | Bright, readable UI |
-| Task management interface | High-contrast design |
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Here's how:
-
-1. **Fork** the repository
-2. Create a **feature branch**: `git checkout -b feature/amazing-feature`
-3. **Commit** your changes: `git commit -m 'Add amazing feature'`
-4. **Push** to the branch: `git push origin feature/amazing-feature`
-5. Open a **Pull Request**
+When migrating to PostgreSQL in production:
+1. Provide your PostgreSQL URI in `DATABASE_URL` (starting with `postgresql://`).
+2. Run database migrations on deployment:
+   ```bash
+   flask db upgrade
+   ```
 
 ---
 
@@ -314,12 +246,8 @@ Contributions are welcome! Here's how:
 
 This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
----
-
 <div align="center">
 
-**Built with ❤️ using Flask & Glassmorphism**
-
-⭐ Star this repo if you found it helpful!
+**Built with ❤️ using React, Flask, and Glassmorphism**
 
 </div>
