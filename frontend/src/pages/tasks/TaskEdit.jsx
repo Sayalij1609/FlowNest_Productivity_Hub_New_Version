@@ -21,7 +21,13 @@ export default function TaskEdit() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await API.put(`/tasks/${id}`, { ...form, category_id: form.category_id || null });
+      const payload = { ...form, category_id: form.category_id || null };
+      // Convert local reminder time to UTC ISO string for the server
+      if (payload.reminder) {
+        const localDate = new Date(payload.reminder);
+        payload.reminder = localDate.toISOString();
+      }
+      await API.put(`/tasks/${id}`, payload);
       toast.success('Task updated!');
       navigate('/tasks');
     } catch (err) { toast.error('Failed to update task'); }

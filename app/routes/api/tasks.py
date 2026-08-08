@@ -141,10 +141,12 @@ def create_task():
         if not val:
             return None
         if isinstance(val, datetime):
-            return val
+            return val.replace(tzinfo=None)
         s = str(val).replace("Z", "+00:00")
         try:
-            return datetime.fromisoformat(s)
+            dt = datetime.fromisoformat(s)
+            # Strip timezone info — we store naive UTC datetimes
+            return dt.replace(tzinfo=None) if dt.tzinfo else dt
         except Exception:
             try:
                 return datetime.strptime(s[:16], "%Y-%m-%dT%H:%M")

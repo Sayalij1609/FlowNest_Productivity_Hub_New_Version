@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import or_
 
@@ -11,8 +11,9 @@ from app.services.notification_service import create_notification
 
 
 def check_reminders():
-
-    now = datetime.now()
+    # Use UTC time since Render servers run in UTC and
+    # the frontend now sends reminder times in UTC
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
 
     tasks = Task.query.filter(
 
@@ -27,7 +28,7 @@ def check_reminders():
 
     ).all()
 
-    print(f"[Reminder] Checking at {now} — found {len(tasks)} pending reminders")
+    print(f"[Reminder] Checking at {now} UTC — found {len(tasks)} pending reminders")
 
     for task in tasks:
 

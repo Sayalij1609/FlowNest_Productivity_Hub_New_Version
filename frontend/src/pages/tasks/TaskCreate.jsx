@@ -24,7 +24,11 @@ export default function TaskCreate() {
       fd.append('priority', form.priority);
       if (form.category_id) fd.append('category_id', form.category_id);
       if (form.deadline) fd.append('deadline', form.deadline);
-      if (form.reminder) fd.append('reminder', form.reminder);
+      if (form.reminder) {
+        // Convert local datetime to UTC ISO string for the server (Render runs in UTC)
+        const localDate = new Date(form.reminder);
+        fd.append('reminder', localDate.toISOString());
+      }
       if (file) fd.append('attachment', file);
 
       await API.post('/tasks', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
