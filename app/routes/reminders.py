@@ -1,3 +1,4 @@
+import os
 from datetime import datetime, timezone
 
 from flask import Blueprint, request, current_app, jsonify
@@ -35,11 +36,9 @@ def debug_reminders():
 
     now = datetime.now(timezone.utc).replace(tzinfo=None)
 
-    # Check mail config
-    mail_user = current_app.config.get("MAIL_USERNAME")
-    mail_pass = current_app.config.get("MAIL_PASSWORD")
-    mail_server = current_app.config.get("MAIL_SERVER")
-    mail_port = current_app.config.get("MAIL_PORT")
+    # Check Brevo config
+    brevo_key = os.getenv("BREVO_API_KEY")
+    sender_email = os.getenv("BREVO_SENDER_EMAIL", "flownest.in@gmail.com")
 
     # Get all tasks with reminders
     all_reminder_tasks = Task.query.filter(
@@ -56,37 +55,33 @@ def debug_reminders():
         )
     ).all()
 
-    # Get future reminders
-    future_tasks = Task.query.filter(
-        Task.reminder.isnot(None),
-        Task.reminder > now
-    ).all()
-
-    # Test SMTP connection
-    smtp_status = "NOT TESTED"
-    try:
-        import smtplib
-        server = smtplib.SMTP(mail_server, mail_port, timeout=10)
-        server.starttls()
-        if mail_user and mail_pass:
-            server.login(mail_user, mail_pass)
-            smtp_status = "SUCCESS — SMTP login worked!"
-        else:
-            smtp_status = "FAILED — MAIL_USERNAME or MAIL_PASSWORD is empty/None"
-        server.quit()
-    except Exception as e:
-        smtp_status = f"FAILED — {str(e)}"
+    # Test Brevo API connection
+    brevo_status = "NOT TESTED"
+    if brevo_key:
+        try:
+            import requests as req
+            resp = req.get(
+                "https://api.brevo.com/v3/account",
+                headers={"api-key": brevo_key, "Accept": "application/json"},
+                timeout=10
+            )
+            if resp.status_code == 200:
+                account = resp.json()
+                brevo_status = f"SUCCESS — Account: {account.get('email', 'unknown')}, Plan: {account.get('plan', [{}])[0].get('type', 'unknown') if account.get('plan') else 'unknown'}"
+            else:
+                brevo_status = f"FAILED — Status {resp.status_code}: {resp.text[:200]}"
+        except Exception as e:
+            brevo_status = f"FAILED — {str(e)}"
+    else:
+        brevo_status = "NOT SET — Add BREVO_API_KEY environment variable"
 
     result = {
         "server_time_utc": str(now),
-        "mail_config": {
-            "MAIL_SERVER": mail_server,
-            "MAIL_PORT": mail_port,
-            "MAIL_USERNAME": mail_user if mail_user else "NOT SET",
-            "MAIL_PASSWORD": ("***" + mail_pass[-4:]) if mail_pass and len(mail_pass) > 4 else ("SET" if mail_pass else "NOT SET"),
-            "MAIL_USE_TLS": current_app.config.get("MAIL_USE_TLS"),
+        "email_config": {
+            "BREVO_API_KEY": ("***" + brevo_key[-4:]) if brevo_key and len(brevo_key) > 4 else ("NOT SET" if not brevo_key else "SET"),
+            "BREVO_SENDER_EMAIL": sender_email,
         },
-        "smtp_test": smtp_status,
+        "brevo_api_test": brevo_status,
         "all_tasks_with_reminders": [
             {
                 "id": t.id,
@@ -98,7 +93,10 @@ def debug_reminders():
             for t in all_reminder_tasks
         ],
         "pending_now": len(pending_tasks),
-        "future_reminders": len(future_tasks),
+        "pending_tasks": [
+            {"id": t.id, "title": t.title, "reminder_utc": str(t.reminder)}
+            for t in pending_tasks
+        ]
     }
 
     return jsonify(result), 200
