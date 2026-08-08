@@ -11,7 +11,8 @@ Manage tasks, capture notes, build habits, track your calendar, and gain analyti
 [![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![Flask](https://img.shields.io/badge/Flask-3.0-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com)
 [![JWT](https://img.shields.io/badge/Auth-JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)](https://jwt.io)
-[![SQLite](https://img.shields.io/badge/Database-SQLite%20%2F%20PostgreSQL-003B57?style=for-the-badge&logo=postgresql&logoColor=white)](https://sqlite.org)
+[![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-003B57?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![Render](https://img.shields.io/badge/Deployed%20on-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://render.com)
 
 </div>
 
@@ -23,7 +24,7 @@ Manage tasks, capture notes, build habits, track your calendar, and gain analyti
 - Create, edit, delete, and restore **archived tasks**
 - Set **priority levels** (Low, Medium, High)
 - Assign custom **color-coded categories**
-- Set **deadlines** and automated **reminders**
+- Set **deadlines** and automated **email reminders**
 - Support for **file attachments** (images, PDFs, documents)
 - Filter by status (Pending / Completed), priority, category, and real-time search
 
@@ -52,7 +53,9 @@ Manage tasks, capture notes, build habits, track your calendar, and gain analyti
 ### 🔔 Notifications & Email Reminders
 - In-app notification feed with unread indicators and mark-as-read controls
 - Background **APScheduler** job running every 60 seconds for due email reminders
-- SMTP integration via Flask-Mail
+- **Brevo (Sendinblue) HTTP API** for reliable email delivery in production (SMTP-free)
+- Styled HTML email templates with task details, priority, and deadline information
+- External cron endpoint (`/check-reminders`) as a backup trigger for free-tier hosting
 
 ### 🎨 Theme & UI Excellence
 - **Glassmorphism Design Tokens** with smooth CSS animations and micro-interactions
@@ -93,7 +96,9 @@ FlowNest uses a decoupled **SPA + REST API** architecture:
 | **API Authentication** | Flask-JWT-Extended (Stateless JWT Tokens) |
 | **Database & ORM** | SQLAlchemy, Flask-Migrate (Alembic) |
 | **Supported Databases** | SQLite (Development), PostgreSQL (`psycopg2-binary` for Production) |
-| **Background Jobs** | APScheduler + Flask-Mail |
+| **Background Jobs** | APScheduler (interval-based reminder checks) |
+| **Email Service** | Brevo (Sendinblue) HTTP API for production, Flask-Mail for local dev |
+| **Deployment** | Render (Gunicorn WSGI server) |
 
 ---
 
@@ -119,7 +124,11 @@ FlowNest/
 │   │   │   ├── profile.py      # Profile & password API
 │   │   │   └── notifications.py# Notifications API
 │   │   └── reminders.py        # External cron reminder endpoint
-│   ├── services/               # Notification & email scheduler services
+│   ├── services/
+│   │   ├── email_service.py    # Brevo HTTP API email sender
+│   │   ├── reminder_service.py # Reminder checking & dispatch logic
+│   │   ├── notification_service.py # In-app notification creator
+│   │   └── scheduler.py        # APScheduler background job setup
 │   └── static/uploads/         # File attachment uploads directory
 ├── frontend/                   # React Single Page Application
 │   ├── src/
@@ -135,8 +144,9 @@ FlowNest/
 ├── instance/                   # SQLite database directory (Development)
 ├── config.py                   # Environment & Flask app settings
 ├── run.py                      # Flask backend entry point
+├── Procfile                    # Gunicorn start command for Render
 ├── requirements.txt            # Python dependencies
-└── .env                        # Local environment variables
+└── .env                        # Local environment variables (not committed)
 ```
 
 ---
@@ -151,8 +161,8 @@ FlowNest/
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/FlowNest.git
-cd FlowNest
+git clone https://github.com/Sayalij1609/FlowNest_Productivity_Hub_New_Version.git
+cd FlowNest_Productivity_Hub_New_Version
 
 # Create and activate virtual environment
 python -m venv venv
@@ -165,12 +175,25 @@ source venv/bin/activate
 
 # Install Python packages
 pip install -r requirements.txt
+```
 
-# Create .env file in root directory
+### 3. Create `.env` File
+
+Create a `.env` file in the root directory:
+
+```env
 SECRET_KEY=dev-secret-key-change-in-prod
 JWT_SECRET_KEY=dev-jwt-secret-key-change-in-prod
 REMINDER_TOKEN=dev-reminder-token
 
+# Email (optional for local dev — uses Brevo HTTP API in production)
+BREVO_API_KEY=your-brevo-api-key
+BREVO_SENDER_EMAIL=your-verified-sender@gmail.com
+```
+
+### 4. Initialize Database & Start Backend
+
+```bash
 # Run database migrations
 flask db upgrade
 
@@ -178,7 +201,7 @@ flask db upgrade
 python run.py
 ```
 
-### 3. Frontend Setup (React SPA)
+### 5. Frontend Setup (React SPA)
 
 In a **second terminal**:
 
@@ -196,49 +219,145 @@ Open **`http://localhost:5173/app/`** in your browser 🎉
 
 ---
 
-## ☁️ Production Deployment Guide
+## ☁️ Production Deployment on Render
 
-FlowNest is designed to be served as a single unified service on free hosting platforms (e.g. **Render**, **Railway**, **Fly.io**, **Koyeb**).
+FlowNest is deployed as a **single unified service** on [Render](https://render.com). Flask serves the built React static bundle from `frontend/dist/` for all non-API routes, while handling REST API requests on `/api/*`.
 
-### Single-Service Deployment Strategy
-Flask automatically serves the built React static bundle from `frontend/dist` for all non-API routes (`/app/*` and `/`).
+### Step 1: Push to GitHub
 
-### 1. Build Frontend Bundle
+Ensure your code is pushed to a GitHub repository with the frontend already built:
+
 ```bash
-cd frontend
-npm run build
+cd frontend && npm run build && cd ..
+git add -A && git commit -m "Production build" && git push origin main
 ```
-This generates the optimized production build in `frontend/dist/`.
 
-### 2. Environment Variables for Hosting Platform
-Set these environment variables in your hosting provider's dashboard:
+### Step 2: Create Render Web Service
+
+1. Go to [render.com](https://render.com) and sign up / log in
+2. Click **"New +"** → **"Web Service"**
+3. Connect your GitHub repository
+4. Configure the service:
+
+| Setting | Value |
+|---------|-------|
+| **Name** | `flownest` (or your preferred name) |
+| **Region** | Choose closest to your users |
+| **Branch** | `main` |
+| **Runtime** | `Python 3` |
+| **Build Command** | `pip install -r requirements.txt && cd frontend && npm install && npm run build` |
+| **Start Command** | `gunicorn run:app --workers 1 --preload --timeout 120` |
+| **Plan** | Free |
+
+> ⚠️ **Important**: Use `--workers 1` to ensure APScheduler runs exactly once (no duplicate reminder emails).
+
+### Step 3: Create PostgreSQL Database
+
+1. On Render dashboard, click **"New +"** → **"PostgreSQL"**
+2. Choose the **Free** plan
+3. After creation, copy the **Internal Database URL**
+
+### Step 4: Set Environment Variables
+
+Go to your Web Service → **Environment** → Add these variables:
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `SECRET_KEY` | Flask session secret key | `random-secure-string` |
-| `JWT_SECRET_KEY` | JWT signing secret | `random-jwt-secure-string` |
-| `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:pass@host/dbname` |
-| `REMINDER_TOKEN` | Security token for cron triggers | `your-cron-secret-token` |
-| `MAIL_USERNAME` | *(Optional)* Gmail SMTP address | `your-app@gmail.com` |
-| `MAIL_PASSWORD` | *(Optional)* Google App Password | `16-character-app-password` |
+| `SECRET_KEY` | Flask session secret key | `generate-a-random-64-char-string` |
+| `JWT_SECRET_KEY` | JWT signing secret | `generate-another-random-string` |
+| `DATABASE_URL` | PostgreSQL connection string (from Step 3) | `postgresql://user:pass@host/dbname` |
+| `REMINDER_TOKEN` | Security token for cron reminder endpoint | `your-secret-cron-token` |
+| `BREVO_API_KEY` | Brevo (Sendinblue) API key for sending emails | `xkeysib-your-api-key...` |
+| `BREVO_SENDER_EMAIL` | Verified sender email in Brevo | `your-app@gmail.com` |
 
-### 3. Start Command for Server
-```bash
-gunicorn run:app
-```
+### Step 5: Set Up Email Reminders (Brevo)
+
+Render's free tier **blocks SMTP ports** (25, 465, 587), so FlowNest uses the [Brevo](https://www.brevo.com/) HTTP API for email delivery:
+
+1. **Create a free Brevo account** at [brevo.com](https://www.brevo.com/) (300 emails/day, no credit card)
+2. **Generate an API key**: Profile → SMTP & API → API Keys → Generate
+3. **Verify your sender email**: Settings → Senders, Domains & Dedicated IPs → Add sender
+4. **Authorize Render's IP**: Settings → Security → Authorized IPs → Add your Render server IP
+5. Add `BREVO_API_KEY` and `BREVO_SENDER_EMAIL` to Render environment variables
+
+### Step 6: Set Up External Cron (Recommended)
+
+Render's free tier spins down after 15 minutes of inactivity, which kills the APScheduler. Use a free external cron to keep the app alive and trigger reminders:
+
+**Option A: [cron-job.org](https://cron-job.org)** (Recommended)
+
+| Setting | Value |
+|---------|-------|
+| **URL** | `https://your-app.onrender.com/check-reminders?token=your-secret-cron-token` |
+| **Schedule** | Every 5 minutes |
+| **Method** | `GET` |
+
+**Option B: [UptimeRobot](https://uptimerobot.com)**
+
+Set up an HTTP(s) monitor pinging the same URL every 5 minutes.
+
+### Step 7: Verify Deployment
+
+After deployment completes:
+
+1. Visit `https://your-app.onrender.com/` — you should see FlowNest
+2. Test the debug endpoint: `https://your-app.onrender.com/debug-reminders?token=your-token`
+3. Verify `brevo_api_test` shows **SUCCESS**
+4. Create a task with a reminder and confirm email delivery
 
 ---
 
 ## 🗄️ Database Migration (SQLite ➔ PostgreSQL)
 
-FlowNest comes ready with `psycopg2-binary` in `requirements.txt`.
+FlowNest comes ready with `psycopg2-binary` in `requirements.txt`. The app automatically detects and uses PostgreSQL when `DATABASE_URL` is set.
 
 When migrating to PostgreSQL in production:
 1. Provide your PostgreSQL URI in `DATABASE_URL` (starting with `postgresql://`).
-2. Run database migrations on deployment:
+2. The app automatically converts `postgres://` to `postgresql://` for compatibility.
+3. Run database migrations on deployment:
    ```bash
    flask db upgrade
    ```
+
+---
+
+## 🔧 Timezone Handling
+
+FlowNest handles timezones transparently:
+
+- **Frontend** → Converts all datetime-local inputs (reminders) to **UTC** before sending to the server
+- **Server** → Stores and compares all timestamps in **UTC**
+- **API Responses** → Returns timestamps with `Z` suffix so browsers auto-convert to the user's local timezone
+- This ensures reminders fire at the correct time regardless of the user's timezone or server location
+
+---
+
+## 📡 API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/auth/register` | Register new user |
+| `POST` | `/api/auth/login` | Login & receive JWT token |
+| `GET` | `/api/auth/me` | Get current user profile |
+| `GET/POST` | `/api/tasks` | List / Create tasks |
+| `GET/PUT/DELETE` | `/api/tasks/<id>` | View / Update / Delete task |
+| `PATCH` | `/api/tasks/<id>/status` | Toggle task completion |
+| `PATCH` | `/api/tasks/<id>/restore` | Restore archived task |
+| `GET/POST` | `/api/categories` | List / Create categories |
+| `GET/POST` | `/api/notes` | List / Create notes |
+| `PUT/DELETE` | `/api/notes/<id>` | Update / Delete note |
+| `PATCH` | `/api/notes/<id>/pin` | Toggle note pin |
+| `GET/POST` | `/api/habits` | List / Create habits |
+| `POST` | `/api/habits/<id>/check-in` | Daily habit check-in |
+| `GET` | `/api/calendar/month/<y>/<m>` | Monthly calendar data |
+| `GET` | `/api/calendar/day/<y>/<m>/<d>` | Day detail view |
+| `GET` | `/api/stats` | Productivity analytics |
+| `GET` | `/api/dashboard` | Dashboard overview |
+| `GET` | `/api/notifications` | List notifications |
+| `PATCH` | `/api/notifications/<id>/read` | Mark notification read |
+| `GET/PUT` | `/api/profile` | View / Update profile |
+| `PUT` | `/api/profile/password` | Change password |
+| `GET` | `/check-reminders?token=<t>` | Trigger reminder check (cron) |
 
 ---
 
