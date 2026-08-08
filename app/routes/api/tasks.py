@@ -125,13 +125,42 @@ def create_task():
         else:
             return jsonify({"error": "Invalid file type"}), 400
 
-    from datetime import datetime
+    from datetime import datetime, date
+
+    def parse_deadline(val):
+        if not val:
+            return None
+        if isinstance(val, date):
+            return val
+        try:
+            return datetime.strptime(str(val)[:10], "%Y-%m-%d").date()
+        except Exception:
+            return None
+
+    def parse_reminder(val):
+        if not val:
+            return None
+        if isinstance(val, datetime):
+            return val
+        s = str(val).replace("Z", "+00:00")
+        try:
+            return datetime.fromisoformat(s)
+        except Exception:
+            try:
+                return datetime.strptime(s[:16], "%Y-%m-%dT%H:%M")
+            except Exception:
+                return None
+
+    parsed_deadline = parse_deadline(deadline)
+    parsed_reminder = parse_reminder(reminder)
+
     task = Task(
         title=title,
         description=description,
         priority=priority,
-        deadline=datetime.strptime(deadline, "%Y-%m-%d").date() if deadline else None,
-        reminder=datetime.strptime(reminder, "%Y-%m-%dT%H:%M") if reminder else None,
+        deadline=parsed_deadline,
+        reminder=parsed_reminder,
+        reminder_sent=False if parsed_reminder else False,
         status="Pending",
         attachment=filename,
         user_id=user_id,
@@ -141,9 +170,7 @@ def create_task():
     db.session.add(task)
     db.session.commit()
 
-    from app.models import User
-    user = User.query.get(user_id)
-    create_notification(user, f'Task "{task.title}" created successfully.')
+    create_notification(user_id, f'Task "{task.title}" created successfully.')
 
     return jsonify(serialize_task(task)), 201
 
@@ -169,17 +196,40 @@ def update_task(task_id):
     task.priority = data.get("priority", task.priority)
     task.category_id = data.get("category_id", task.category_id)
 
-    deadline = data.get("deadline")
-    if deadline:
-        from datetime import datetime
-        task.deadline = datetime.strptime(deadline, "%Y-%m-%d").date()
+    from datetime import datetime, date
 
-    reminder = data.get("reminder")
-    if reminder:
-        from datetime import datetime
-        task.reminder = datetime.strptime(reminder, "%Y-%m-%dT%H:%M")
-    elif "reminder" in data and data["reminder"] is None:
-        task.reminder = None
+    def parse_deadline(val):
+        if not val:
+            return None
+        if isinstance(val, date):
+            return val
+        try:
+            return datetime.strptime(str(val)[:10], "%Y-%m-%d").date()
+        except Exception:
+            return None
+
+    def parse_reminder(val):
+        if not val:
+            return None
+        if isinstance(val, datetime):
+            return val
+        s = str(val).replace("Z", "+00:00")
+        try:
+            return datetime.fromisoformat(s)
+        except Exception:
+            try:
+                return datetime.strptime(s[:16], "%Y-%m-%dT%H:%M")
+            except Exception:
+                return None
+
+    if "deadline" in data:
+        task.deadline = parse_deadline(data["deadline"])
+
+    if "reminder" in data:
+        new_reminder = parse_reminder(data["reminder"])
+        if new_reminder != task.reminder:
+            task.reminder = new_reminder
+            task.reminder_sent = False
 
     db.session.commit()
 
