@@ -13,7 +13,14 @@ export default function TaskEdit() {
   useEffect(() => {
     Promise.all([API.get(`/tasks/${id}`), API.get('/categories')]).then(([taskRes, catsRes]) => {
       const t = taskRes.data;
-      setForm({ title: t.title, description: t.description || '', priority: t.priority, category_id: t.category_id || '', deadline: t.deadline || '', reminder: t.reminder ? t.reminder.substring(0, 16) : '' });
+      setForm({
+        title: t.title,
+        description: t.description || '',
+        priority: t.priority,
+        category_id: t.category_id || '',
+        deadline: t.deadline || '',
+        reminder: t.reminder ? new Date(t.reminder).toLocaleString('sv-SE', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).replace(' ', 'T') : ''
+      });
       setCategories(catsRes.data);
     }).catch(console.error).finally(() => setLoading(false));
   }, [id]);

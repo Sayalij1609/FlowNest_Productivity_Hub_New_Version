@@ -20,7 +20,7 @@ def serialize_task(task):
         "priority": task.priority,
         "status": task.status,
         "deadline": task.deadline.isoformat() if task.deadline else None,
-        "reminder": task.reminder.isoformat() if task.reminder else None,
+        "reminder": (task.reminder.isoformat() + "Z") if task.reminder else None,
         "attachment": task.attachment,
         "category_id": task.category_id,
         "category_name": task.category.name if task.category else None,
