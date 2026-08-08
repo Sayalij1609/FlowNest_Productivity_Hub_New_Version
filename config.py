@@ -20,10 +20,12 @@ class Config:
     # Secret key used by Flask
     SECRET_KEY = os.getenv("SECRET_KEY") or "flownest-dev-secret-key-12345"
 
-    # Database URI — use absolute path for SQLite
-    SQLALCHEMY_DATABASE_URI = os.getenv(
-        "DATABASE_URL"
-    ) or ("sqlite:///" + os.path.join(BASE_DIR, "instance", "flownest.db"))
+    # Database URI — support Render/Heroku postgres:// scheme fix and fallback to SQLite
+    db_url = os.getenv("DATABASE_URL")
+    if db_url and db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+    SQLALCHEMY_DATABASE_URI = db_url or ("sqlite:///" + os.path.join(BASE_DIR, "instance", "flownest.db"))
 
     # Disable unnecessary tracking
     SQLALCHEMY_TRACK_MODIFICATIONS = False
