@@ -7,6 +7,7 @@ from app.models import Task
 from app.extensions import db
 
 from app.services.email_service import send_reminder_email
+from app.services.notification_service import create_notification
 
 
 def check_reminders():
@@ -35,12 +36,19 @@ def check_reminders():
                 task.user,
                 task
             )
-
-            task.reminder_sent = True
             print(f"[Reminder] Email sent for task: {task.title}")
-
         except Exception as e:
-            print(f"[Reminder] Failed to send email for task '{task.title}': {e}")
-            task.reminder_sent = True  # Mark sent to stop retrying
+            print(f"[Reminder] Email failed for task '{task.title}': {e}")
+
+        # Create in-app notification
+        try:
+            create_notification(
+                task.user_id,
+                f"Reminder for task: '{task.title}'"
+            )
+        except Exception as e:
+            print(f"[Reminder] Notification creation failed: {e}")
+
+        task.reminder_sent = True
 
     db.session.commit()
