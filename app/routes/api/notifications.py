@@ -22,7 +22,7 @@ def list_notifications():
             "id": n.id,
             "message": n.message,
             "is_read": n.is_read,
-            "created_at": n.created_at.isoformat() if n.created_at else None
+            "created_at": (n.created_at.isoformat() + "Z") if n.created_at else None
         }
         for n in notifications
     ]), 200

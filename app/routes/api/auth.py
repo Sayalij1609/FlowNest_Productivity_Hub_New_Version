@@ -120,6 +120,6 @@ def get_current_user():
         "profile_image": user.profile_image,
         "bio": user.bio,
         "theme": user.theme,
-        "created_at": user.created_at.isoformat() if user.created_at else None,
+        "created_at": (user.created_at.isoformat() + "Z") if user.created_at else None,
         "unread_notifications": unread_count
     }), 200

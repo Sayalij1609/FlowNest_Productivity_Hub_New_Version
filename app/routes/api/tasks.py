@@ -25,8 +25,8 @@ def serialize_task(task):
         "category_id": task.category_id,
         "category_name": task.category.name if task.category else None,
         "category_color": task.category.color if task.category else None,
-        "created_at": task.created_at.isoformat() if task.created_at else None,
-        "updated_at": task.updated_at.isoformat() if task.updated_at else None
+        "created_at": (task.created_at.isoformat() + "Z") if task.created_at else None,
+        "updated_at": (task.updated_at.isoformat() + "Z") if task.updated_at else None
     }
 
 

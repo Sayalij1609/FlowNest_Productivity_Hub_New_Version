@@ -16,7 +16,7 @@ def serialize_habit(habit, include_details=True):
         "description": habit.description,
         "current_streak": habit.current_streak,
         "longest_streak": habit.longest_streak,
-        "created_at": habit.created_at.isoformat() if habit.created_at else None
+        "created_at": (habit.created_at.isoformat() + "Z") if habit.created_at else None
     }
 
     if not include_details:

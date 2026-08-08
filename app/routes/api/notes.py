@@ -14,8 +14,8 @@ def serialize_note(note):
         "content": note.content,
         "color": note.color,
         "is_pinned": note.is_pinned,
-        "created_at": note.created_at.isoformat() if note.created_at else None,
-        "updated_at": note.updated_at.isoformat() if note.updated_at else None
+        "created_at": (note.created_at.isoformat() + "Z") if note.created_at else None,
+        "updated_at": (note.updated_at.isoformat() + "Z") if note.updated_at else None
     }
 
 
