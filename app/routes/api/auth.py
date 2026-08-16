@@ -8,6 +8,8 @@ from app.models import User
 from app.extensions import db
 from datetime import timedelta
 
+from email_validator import validate_email, EmailNotValidError
+
 auth_api = Blueprint("auth_api", __name__, url_prefix="/auth")
 
 
@@ -19,11 +21,21 @@ def register():
         return jsonify({"error": "No data provided"}), 400
 
     username = data.get("username", "").strip()
-    email = data.get("email", "").strip()
+    raw_email = data.get("email", "").strip()
     password = data.get("password", "")
 
-    if not username or not email or not password:
+    if not username or not raw_email or not password:
         return jsonify({"error": "All fields are required"}), 400
+
+    if len(username) < 3 or len(username) > 30:
+        return jsonify({"error": "Username must be between 3 and 30 characters"}), 400
+
+    # Email format & domain deliverability validation
+    try:
+        valid_email = validate_email(raw_email, check_deliverability=True)
+        email = valid_email.normalized.lower()
+    except EmailNotValidError as e:
+        return jsonify({"error": str(e)}), 400
 
     if len(password) < 6:
         return jsonify({"error": "Password must be at least 6 characters"}), 400
