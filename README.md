@@ -57,8 +57,13 @@ Manage tasks, capture notes, build habits, track your calendar, and gain analyti
 - Styled HTML email templates with task details, priority, and deadline information
 - External cron endpoint (`/check-reminders`) as a backup trigger for free-tier hosting
 
+### 🔒 Security & Authentication
+- Stateless **JWT Token** authentication (`Flask-JWT-Extended`)
+- Strict **DNS deliverability email validation** (`check_deliverability=True` via `email-validator`) to verify domain MX records and reject non-existent or fake email domains upon registration
+- Secure password hashing with `Werkzeug`
+
 ### 🎨 Theme & UI Excellence
-- **Glassmorphism Design Tokens** with smooth CSS animations and micro-interactions
+- **Glassmorphism Design Tokens** with custom maroon/magenta theme, smooth CSS animations, and micro-interactions
 - **Dark / Light mode** toggle with persistent user preference (`localStorage`)
 - Fully responsive across desktop, tablet, and mobile displays
 
@@ -94,6 +99,7 @@ FlowNest uses a decoupled **SPA + REST API** architecture:
 | **HTTP Client** | Axios (with Request Interceptor for JWT Bearer Tokens) |
 | **Backend Framework** | Python 3.12, Flask 3.0 |
 | **API Authentication** | Flask-JWT-Extended (Stateless JWT Tokens) |
+| **Email & Domain Validation** | `email-validator` with DNS MX deliverability check (`check_deliverability=True`) |
 | **Database & ORM** | SQLAlchemy, Flask-Migrate (Alembic) |
 | **Supported Databases** | SQLite (Development), PostgreSQL (`psycopg2-binary` for Production) |
 | **Background Jobs** | APScheduler (interval-based reminder checks) |
